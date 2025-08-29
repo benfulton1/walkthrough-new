@@ -6,47 +6,154 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#e65c00" />
-  <!-- Optional PWA bits (safe to leave even if you don’t upload the icons/manifest yet) -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <title>Deficiency Walkthrough — iOS Mobile v2</title>
   <style>
     :root{
       --brand:#e65c00; --ink:#0f172a; --muted:#64748b; --bg:#f6f7fb; --card:#ffffff;
-      --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626; --ring:rgba(230,92,0,.28);
+      --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626;
       --radius:16px;
     }
     @media (prefers-color-scheme: dark){
-      :root{ --bg:#0b0f17; --card:#0f1522; --ink:#e6ebf5; --muted:#94a3b8; --ring:rgba(230,92,0,.35); }
+      :root{ --bg:#0b0f17; --card:#0f1522; --ink:#e6ebf5; --muted:#94a3b8; }
       body{color-scheme:dark;}
       input,select,textarea{background:#0c121e;color:var(--ink);border-color:#233044}
     }
-    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     html,body{height:100%}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:17px;}
-    header{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid #e5e7eb;padding:10px calc(16px + env(safe-area-inset-left)) 10px calc(16px + env(safe-area-inset-right));}
+    header{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid #e5e7eb;padding:10px 16px;}
     .title{font-weight:800;font-size:18px}
     .sub{color:var(--muted);font-size:12px}
     main{padding:12px 16px 120px 16px;}
-    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);box-shadow:0 1px 2px rgba(0,0,0,.05);margin:10px 0}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);margin:10px 0;padding:14px}
     .card h2{margin:0 0 8px;font-size:18px}
-    .content{padding:14px}
     label{font-size:12px;color:var(--muted);display:block;margin:8px 0 6px}
-    input, select, textarea{width:100%;padding:12px 12px;border:1px solid #d1d5db;border-radius:14px;background:#fff;font:inherit;min-height:44px;}
-    input, select{font-size:17px;}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:14px;background:#fff;font:inherit;min-height:44px}
+    input,select{font-size:17px;}
     textarea{min-height:96px}
     .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > *{flex:1 1 200px}
-    button, .btn{appearance:none;border:1px solid #cbd5e1;background:#fff;color:var(--ink);padding:12px 14px;border-radius:14px;font-weight:700;cursor:pointer;min-height:44px}
+    .row>*{flex:1 1 200px}
+    button{appearance:none;border:1px solid #cbd5e1;background:#fff;color:var(--ink);padding:12px 14px;border-radius:14px;font-weight:700;cursor:pointer;min-height:44px}
     button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-    button.ghost{background:transparent}
     button:active{transform:translateY(1px)}
-    details.ac{border:1px dashed #e5e7eb;border-radius:12px;padding:8px;margin:6px 0}
-    details summary{cursor:pointer;font-weight:700}
-    .checklist{display:grid;gap:10px;margin-top:8px}
-    .check{display:flex;align-items:flex-start;gap:10px}
-    .check input[type="checkbox"]{width:26px;height:26px}
+    .dock{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--card);border-top:1px solid #e5e7eb;box-shadow:0 -6px 22px rgba(0,0,0,.08);padding:10px 16px}
+    .dock .bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .checklist{display:grid;gap:10px}
+    .check{display:flex;gap:10px;align-items:flex-start}
+    .check input{width:26px;height:26px}
     .note-inline{display:none;margin-left:32px}
-    .check input[type="checkbox"]:checked ~ .note
+    .check input:checked~.note-inline{display:block}
+    .progress{height:12px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .progress>span{display:block;height:100%;width:0;background:var(--brand);transition:width .3s}
+    .pill{border-radius:999px;padding:4px 10px;font-size:12px;background:#eef2ff;border:1px solid #c7d2fe}
+    .area{border:1px solid #e5e7eb;border-radius:var(--radius);margin:8px 0;padding:12px;background:#fff}
+    .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .thumb{width:84px;height:84px;border:1px dashed #cbd5e1;border-radius:10px;display:grid;place-items:center;overflow:hidden;background:#f9fafb}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Deficiency Walkthrough</div>
+    <div class="sub">iPhone-optimized • works offline • photo capture • signature</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Project</h2>
+      <div class="row">
+        <div><label>Project Name</label><input id="project_name" /></div>
+        <div><label>Address</label><input id="project_address" /></div>
+      </div>
+      <div class="row">
+        <div><label>Date</label><input id="walk_date" type="date" /></div>
+        <div><label>Time</label><input id="walk_time" type="time" /></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>People</h2>
+      <div class="row">
+        <div><label>Client</label><input id="client_name" /></div>
+        <div><label>Email</label><input id="client_email" type="email" /></div>
+      </div>
+      <div class="row">
+        <div><label>Contact</label><input id="site_contact" /></div>
+        <div><label>Phone</label><input id="site_phone" type="tel" /></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Areas</h2>
+      <div id="areas"></div>
+      <button id="add_area" class="primary" style="margin-top:10px">Add Area</button>
+    </section>
+
+    <section class="card">
+      <h2>Completion Progress</h2>
+      <div class="progress"><span id="progress-bar"></span></div>
+      <div class="pill" id="progress-label">0% complete</div>
+    </section>
+  </main>
+
+  <div class="dock">
+    <div class="bar">
+      <button class="primary" id="dock-add">Add Area</button>
+      <button id="dock-photo">Quick Photo</button>
+      <button id="dock-save">Save</button>
+      <button id="dock-clear">Clear</button>
+    </div>
+  </div>
+
+<script>
+const areasEl=document.getElementById('areas');
+let areaCount=0;
+function addArea(){
+  const id=`area-${++areaCount}`;
+  const div=document.createElement('div');
+  div.className='area';
+  div.innerHTML=`
+    <strong>Area ${areaCount}</strong>
+    <div class="checklist">
+      <label class="check"><input type="checkbox"> Walls<div class="note-inline"><input placeholder="Notes"></div></label>
+      <label class="check"><input type="checkbox"> Ceiling<div class="note-inline"><input placeholder="Notes"></div></label>
+      <label class="check"><input type="checkbox"> Floors<div class="note-inline"><input placeholder="Notes"></div></label>
+    </div>
+    <div class="thumbs"></div>
+    <input type="file" accept="image/*" capture="environment" onchange="addPhoto(this,'${id}')">
+  `;
+  div.id=id;
+  areasEl.appendChild(div);
+}
+function addPhoto(input,id){
+  const holder=document.querySelector('#'+id+' .thumbs');
+  [...input.files].forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const t=document.createElement('div');
+      t.className='thumb';
+      t.innerHTML=`<img src="${e.target.result}">`;
+      holder.appendChild(t);
+    };
+    r.readAsDataURL(f);
+  });
+}
+function updateProgress(){
+  const checks=document.querySelectorAll('input[type=checkbox]');
+  const total=checks.length;
+  const done=[...checks].filter(c=>c.checked).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('progress-label').textContent=pct+'% complete';
+}
+setInterval(updateProgress,1000);
+
+document.getElementById('add_area').onclick=addArea;
+document.getElementById('dock-add').onclick=addArea;
+document.getElementById('dock-save').onclick=()=>{localStorage.setItem('walkthrough',areasEl.innerHTML)};
+document.getElementById('dock-clear').onclick=()=>{areasEl.innerHTML='';localStorage.removeItem('walkthrough')};
+document.getElementById('dock-photo').onclick=()=>{const input=document.createElement('input');input.type='file';input.accept='image/*';input.capture='environment';input.onchange=()=>addPhoto(input,'areas');input.click()};
+window.onload=()=>{areasEl.innerHTML=localStorage.getItem('walkthrough')||''};
+</script>
+</body>
+</html>
