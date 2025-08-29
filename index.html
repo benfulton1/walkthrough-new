@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Deficiency Walkthrough Form</title>
+  <style>
+    :root{
+      --brand:#e65c00; --ink:#1e293b; --muted:#64748b; --bg:#f7f7f9; --card:#ffffff;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626; --ring:rgba(230,92,0,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+    header{
+      position:sticky;top:0;z-index:40;background:var(--card);border-bottom:1px solid #e5e7eb
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .title{font-size:18px;font-weight:700;margin-right:auto}
+    button, .btn{appearance:none;border:1px solid #cbd5e1;background:#fff;padding:10px 12px;border-radius:12px;font-weight:600;cursor:pointer}
+    button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    button:active{transform:translateY(1px)}
+    main{padding:16px}
+    .grid{display:grid;gap:12px}
+    @media (min-width:780px){.grid.two{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card h2{margin:0 0 12px;font-size:18px}
+    .card .content{padding:14px}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="text"], input[type="date"], input[type="time"], input[type="email"], input[type="tel"], select, textarea{
+      width:100%;padding:12px 12px;border:1px solid #d1d5db;border-radius:12px;background:#fff;font:inherit
+    }
+    textarea{min-height:88px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > *{flex:1 1 180px}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid #e2e8f0;background:#fff}
+    .list{display:grid;gap:10px}
+    .def-item{border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;background:#fff}
+    .def-head{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#f8fafc;padding:10px 12px;border-bottom:1px solid #e5e7eb}
+    .def-body{padding:12px;display:grid;gap:12px}
+    .tag{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid #e2e8f0;background:#fff;color:#334155}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    details.accordion{border:1px dashed #e5e7eb;border-radius:12px;padding:8px}
+    details summary{cursor:pointer;font-weight:600}
+    .checklist{display:grid;gap:8px;margin-top:6px}
+    .check{display:flex;align-items:flex-start;gap:10px}
+    .check input[type="checkbox"]{width:22px;height:22px}
+    .note-inline{display:none;margin-left:32px}
+    .check input[type="checkbox"]:checked ~ .note-inline{display:block}
+    .thumbs{display:flex;gap:10px;flex-wrap:wrap}
+    .thumb{width:84px;height:84px;border:1px dashed #cbd5e1;border-radius:8px;display:grid;place-items:center;overflow:hidden;background:#f9fafb}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .muted{color:var(--muted)}
+    .divider{height:1px;background:#e5e7eb;margin:10px 0}
+    .danger{color:var(--bad)}
+    .status-dot{width:10px;height:10px;border-radius:50%}
+    .s-ok{background:var(--ok)}.s-warn{background:var(--warn)}.s-bad{background:var(--bad)}
+    .sig-wrap{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+    .sig-toolbar{background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;padding:8px}
+    canvas{touch-action:none}
+    .help{font-size:12px;color:var(--muted)}
+    .sticky-actions{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:10px;z-index:50}
+    .sticky-actions button{box-shadow:0 6px 18px rgba(0,0,0,.12)}
+    .pill{border-radius:999px;padding:2px 8px;font-size:12px;background:#eef2ff;border:1px solid #c7d2fe}
+    .progress{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .progress > span{display:block;height:100%;width:0;background:var(--brand);transition:width .3s ease}
+    @media print{
+      header,.sticky-actions{display:none}
+      body{background:#fff}
+      .card{break-inside:avoid}
+      .def-item{page-break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap toolbar">
+      <div class="title">Deficiency Walkthrough</div>
+      <button id="btn-save" title="Save form locally">Save</button>
+      <button id="btn-load" title="Load last saved">Load</button>
+      <button id="btn-clear" class="danger" title="Clear everything">Clear</button>
+      <button id="btn-print" class="primary" title="Print / Export to PDF">Print / PDF</button>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <!-- Project & Client Info -->
+    <section class="card">
+      <div class="content grid two">
+        <div>
+          <h2>Project</h2>
+          <div class="row">
+            <div><label>Project Name</label><input id="project_name" type="text" placeholder="e.g., Smith Residence" /></div>
+            <div><label>Address</label><input id="project_address" type="text" placeholder="Street, City, Province" /></div>
+          </div>
+          <div class="row">
+            <div><label>Walkthrough Date</label><input id="walk_date" type="date" /></div>
+            <div><label>Time</label><input id="walk_time" type="time" /></div>
+          </div>
+          <div class="row">
+            <div><label>Build Type</label>
+              <select id="build_type">
+                <option>Renovation</option>
+                <option>New Home Build</option>
+                <option>Commercial TI</option>
+              </select>
+            </div>
+            <div><label>Phase</label>
+              <select id="phase">
+                <option>Pre‑Completion</option>
+                <option>Substantial Completion</option>
+                <option>Final</option>
+                <option>Warranty</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2>People</h2>
+          <div class="row">
+            <div><label>Client Name</label><input id="client_name" type="text" /></div>
+            <div><label>Client Email</label><input id="client_email" type="email" inputmode="email" /></div>
+          </div>
+          <div class="row">
+            <div><label>Site Contact</label><input id="site_contact" type="text" /></div>
+            <div><label>Phone</label><input id="site_phone" type="tel" inputmode="tel" /></div>
+          </div>
+          <div class="row">
+            <div><label>Project Manager</label><input id="pm_name" type="text" /></div>
+            <div><label>Supervisor</label><input id="sup_name" type="text" /></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Site Checklists -->
+    <section class="card">
+      <div class="content">
+        <h2>Site Readiness & Safety</h2>
+        <details class="accordion" open>
+          <summary>General Site Conditions</summary>
+          <div class="checklist" id="site-checklist"></div>
+        </details>
+        <div class="divider"></div>
+        <details class="accordion" open>
+          <summary>Cleanliness & Protection</summary>
+          <div class="checklist" id="clean-checklist"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Add Area / Room -->
+    <section class="card">
+      <div class="content">
+        <h2>Add Area / Room</h2>
+        <div class="row">
+          <div>
+            <label>Area / Room Type</label>
+            <select id="room_type">
+              <option>Kitchen</option>
+              <option>Bathroom</option>
+              <option>Bedroom</option>
+              <option>Living / Dining</option>
+              <option>Entry / Hall</option>
+              <option>Laundry / Mudroom</option>
+              <option>Exterior</option>
+              <option>Mechanical / Electrical</option>
+              <option>Custom…</option>
+            </select>
+          </div>
+          <div>
+            <label>Label (optional)</label>
+            <input id="room_label" type="text" placeholder="e.g., Ensuite, Bedroom 2" />
+          </div>
+          <div style="align-self:end"><button id="add_room" class="primary">Add Area</button></div>
+        </div>
+        <p class="help">Each area includes a targeted checklist, photo capture, and deficiency table with dropdowns.</p>
+      </div>
+    </section>
+
+    <!-- Areas List -->
+    <section class="card">
+      <div class="content">
+        <h2>Areas</h2>
+        <div id="areas" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Sign-off -->
+    <section class="card">
+      <div class="content">
+        <h2>Sign‑off</h2>
+        <div class="row">
+          <div><label>Client Name</label><input id="sign_client" type="text" /></div>
+          <div><label>Elite Rep</label><input id="sign_rep" type="text" /></div>
+          <div><label>Date</label><input id="sign_date" type="date" /></div>
+        </div>
+        <div class="sig-wrap" style="margin-top:10px">
+          <div class="sig-toolbar">
+            <span class="muted">Signature (draw with finger/stylus)</span>
+            <span style="margin-left:auto"></span>
+            <button id="sig-clear">Clear</button>
+          </div>
+          <canvas id="sig" width="900" height="220"></canvas>
+        </div>
+        <p class="help">Tip: On iPhone/iPad, rotate to landscape for a wider signature area.</p>
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section class="card">
+      <div class="content">
+        <h2>Completion Progress</h2>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="row">
+          <div class="chip"><span class="status-dot s-ok"></span> Resolved</div>
+          <div class="chip"><span class="status-dot s-warn"></span> In Progress</div>
+          <div class="chip"><span class="status-dot s-bad"></span> Open</div>
+          <div class="pill" id="progress-label">0% complete</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Floating actions for iOS thumb reachability -->
+  <div class="sticky-actions">
+    <button class="primary" id="quick-add">Quick Deficiency</button>
+    <button id="quick-photo">Quick Photo</button>
+  </div>
+
+<script>
+// ---------- Data templates ----------
+const TEMPLATES = {
+  site: [
+    'Access routes clear', 'Stairs/handrails safe', 'Adequate lighting', 'Utilities available',
+    'Noise/dust control in place', 'First aid / extinguisher present', 'Muster point identified',
+    'Permits/inspections posted'
+  ],
+  clean: [
+    'Floor protection installed', 'Surface protection intact', 'Debris removed', 'Windows/glazing clean',
+    'Bathrooms clean/functional', 'HVAC returns protected', 'Exterior kept tidy'
+  ],
+  byRoom: {
+    'Kitchen': ['Cabinet alignment/gaps','Door/drawer operation','Countertop seams/overhang','Appliance clearances','Plumbing leaks/ROV','Backsplash grout/caulk','GFCI & circuits','Paint touch-ups'],
+    'Bathroom': ['Tile lippage/grout','Silicone at wet joints','Fixture operation/leaks','Fan operation/sone','Shower door sweep/slope','Heated floor test','Accessories anchored','Paint touch-ups'],
+    'Bedroom': ['Door swing/latch','Window operation','Closet hardware','Base/casing joints','Floor squeaks/gaps','Paint touch-ups','Outlets/plates'],
+    'Living / Dining': ['Drywall finish','Ceiling fixtures','Floor transitions','Railing/balusters','Fireplace clearances','Paint touch-ups','Outlets/switches'],
+    'Entry / Hall': ['Closet rods/shelves','Door closers/stops','Trim/caulk lines','Floor mats/transitions','Paint touch-ups','GFI near entry (if req)'],
+    'Laundry / Mudroom': ['Washer pan/drain','Vent termination','Cabinet alignment','Countertop support','Floor slope/drain','Paint touch-ups'],
+    'Exterior': ['Siding fasteners/caulk','Flashing/end dams','Soffit/fascia','Gutters/downspouts','Grade slope away','Deck guard/step rise','Paint/touch-ups'],
+    'Mechanical / Electrical': ['Thermostat operation','Supply/return flows','Panel labeling','AFCI/GFCI tests','Smoke/CO alarms','HRV settings','Seal penetrations']
+  },
+  trades: ['Carpentry','Drywall/Taping','Paint','Tile','Flooring','Cabinetry','Plumbing','Electrical','HVAC','Glazing','Landscaping','Other'],
+  priorities: ['Low','Medium','High','Critical'],
+  status: ['Open','In Progress','Resolved']
+};
+
+// Render site checklists with inline notes
+function renderBaseChecklists(){
+  const mk = (arr, rootId) => {
+    const root = document.getElementById(rootId);
+    root.innerHTML = '';
+    arr.forEach((text, i)=>{
+      const id = `${rootId}-${i}`;
+      const wrap = document.createElement('div');
+      wrap.className='check';
+      wrap.innerHTML = `
+        <input type="checkbox" id="${id}">
+        <label for="${id}" style="flex:1">${text}</label>
+        <div class="note-inline" style="flex:1">
+          <label>Notes</label>
+          <input type="text" data-note-of="${id}" placeholder="Optional details" />
+        </div>`;
+      root.appendChild(wrap);
+      wrap.querySelector('input[type="checkbox"]').addEventListener('change',updateProgress);
+    });
+  };
+  mk(TEMPLATES.site, 'site-checklist');
+  mk(TEMPLATES.clean, 'clean-checklist');
+}
+
+// Areas/Rooms handling
+const areasEl = document.getElementById('areas');
+let areaCounter = 0;
+
+function addArea(){
+  const type = document.getElementById('room_type').value;
+  const label = document.getElementById('room_label').value.trim();
+  const name = label ? `${type} — ${label}` : type;
+  const id = `area-${++areaCounter}`;
+  const checkItems = (TEMPLATES.byRoom[type]||['General review','Finish quality','Function tests']);
+
+  const el = document.createElement('div');
+  el.className='def-item';
+  el.dataset.areaId = id;
+  el.innerHTML = `
+    <div class="def-head">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <strong>${name}</strong>
+        <span class="tags">
+          <span class="tag">Type: ${type}</span>
+          <span class="tag">Items: <span class="item-count">0</span></span>
+        </span>
+      </div>
+      <div class="row" style="justify-content:flex-end;gap:8px">
+        <button class="btn-add-def">Add Deficiency</button>
+        <button class="btn-photo">Add Photo</button>
+        <button class="btn-remove danger">Remove</button>
+      </div>
+    </div>
+    <div class="def-body">
+      <details class="accordion" open>
+        <summary>Checklist</summary>
+        <div class="checklist room-check"></div>
+      </details>
+      <div>
+        <label>Photos</label>
+        <div class="thumbs"></div>
+      </div>
+      <div>
+        <label>Deficiencies</label>
+        <div class="list defs"></div>
+      </div>
+    </div>`;
+
+  // populate room checklist
+  const rc = el.querySelector('.room-check');
+  checkItems.forEach((txt, i)=>{
+    const cid = `${id}-chk-${i}`;
+    const row = document.createElement('div');
+    row.className='check';
+    row.innerHTML = `
+      <input type="checkbox" id="${cid}">
+      <label for="${cid}" style="flex:1">${txt}</label>
+      <div class="note-inline" style="flex:1">
+        <label>Notes</label>
+        <input type="text" data-note-of="${cid}" placeholder="Optional details" />
+      </div>`;
+    rc.appendChild(row);
+    row.querySelector('input').addEventListener('change',updateProgress);
+  });
+
+  // actions
+  el.querySelector('.btn-remove').addEventListener('click',()=>{ el.remove(); updateProgress(); saveDraft(); });
+  el.querySelector('.btn-add-def').addEventListener('click',()=> addDeficiency(el));
+  el.querySelector('.btn-photo').addEventListener('click',()=> quickPhoto(el.querySelector('.thumbs')));
+
+  areasEl.appendChild(el);
+  updateCounts();
+  updateProgress();
+  saveDraft();
+}
+
+function updateCounts(){
+  areasEl.querySelectorAll('.def-item').forEach(card=>{
+    const count = card.querySelectorAll('.defs > .def').length;
+    card.querySelector('.item-count').textContent = count;
+  })
+}
+
+function addDeficiency(container){
+  const defs = container.querySelector('.defs');
+  const def = document.createElement('div');
+  def.className='def';
+  def.style.border='1px solid #e5e7eb';
+  def.style.borderRadius='12px';
+  def.style.padding='10px';
+  def.style.display='grid';
+  def.style.gap='10px';
+  def.innerHTML = `
+    <div class="row">
+      <div>
+        <label>Description</label>
+        <input type="text" placeholder="What needs fixing?" class="def-desc" />
+      </div>
+      <div>
+        <label>Category</label>
+        <select class="def-cat">
+          <option>Finish</option>
+          <option>Function</option>
+          <option>Code/Compliance</option>
+          <option>Warranty</option>
+          <option>Cleanup</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Responsible Trade</label>
+        <select class="def-trade">${TEMPLATES.trades.map(t=>`<option>${t}</option>`).join('')}</select>
+      </div>
+      <div>
+        <label>Priority</label>
+        <select class="def-priority">${TEMPLATES.priorities.map(p=>`<option>${p}</option>`).join('')}</select>
+      </div>
+      <div>
+        <label>Status</label>
+        <select class="def-status">${TEMPLATES.status.map(s=>`<option>${s}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Due Date</label>
+        <input type="date" class="def-due" />
+      </div>
+      <div>
+        <label>Location (within area)</label>
+        <input type="text" class="def-loc" placeholder="e.g., north wall, island back" />
+      </div>
+      <div>
+        <label>Client Visible?</label>
+        <select class="def-visible"><option>Yes</option><option>No</option></select>
+      </div>
+    </div>
+    <div>
+      <label>Notes</label>
+      <textarea class="def-notes" placeholder="Any additional context"></textarea>
+    </div>
+    <div class="row">
+      <div>
+        <label>Attach Photo</label>
+        <input type="file" accept="image/*" capture="environment" class="def-file" />
+        <div class="thumbs"></div>
+      </div>
+      <div style="align-self:end;margin-left:auto">
+        <button class="def-remove danger">Remove</button>
+      </div>
+    </div>`;
+
+  // photo preview for this deficiency
+  def.querySelector('.def-file').addEventListener('change', function(){
+    const holder = def.querySelector('.thumbs');
+    [...this.files].forEach(f=>{
+      const r = new FileReader();
+      r.onload = e=>{
+        const t = document.createElement('div'); t.className='thumb';
+        t.innerHTML = `<img alt="photo" src="${e.target.result}"/>`;
+        holder.appendChild(t); saveDraft();
+      };
+      r.readAsDataURL(f);
+    });
+  });
+
+  // remove button
+  def.querySelector('.def-remove').addEventListener('click',()=>{ def.remove(); updateCounts(); updateProgress(); saveDraft(); });
+
+  // status changes update progress
+  def.querySelector('.def-status').addEventListener('change',updateProgress);
+
+  defs.appendChild(def);
+  updateCounts();
+  saveDraft();
+}
+
+function quickPhoto(target){
+  const input = document.createElement('input');
+  input.type='file'; input.accept='image/*'; input.capture='environment';
+  input.addEventListener('change', function(){
+    if(!target){
+      // default to first area gallery or create temporary holder
+      target = document.querySelector('#areas .thumbs') || document.createElement('div');
+    }
+    [...this.files].forEach(f=>{
+      const r = new FileReader(); r.onload = e=>{
+        const t = document.createElement('div'); t.className='thumb';
+        t.innerHTML = `<img alt="photo" src="${e.target.result}"/>`;
+        target.appendChild(t); saveDraft();
+      }; r.readAsDataURL(f);
+    });
+  });
+  input.click();
+}
+
+// ---------- Signature Pad ----------
+(function(){
+  const canvas = document.getElementById('sig');
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth=2; ctx.lineCap='round';
+  let drawing=false, last=null;
+  const pos = (e)=>{
+    if(e.touches && e.touches[0]){
+      const r = canvas.getBoundingClientRect();
+      return {x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top};
+    }
+    return {x: e.offsetX, y: e.offsetY};
+  };
+  const down = (e)=>{ drawing=true; last=pos(e); };
+  const move = (e)=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; };
+  const up = ()=>{ drawing=false; last=null; };
+  canvas.addEventListener('mousedown',down); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();down(e)}); canvas.addEventListener('touchmove',e=>{e.preventDefault();move(e)}); canvas.addEventListener('touchend',e=>{e.preventDefault();up(e)});
+  document.getElementById('sig-clear').addEventListener('click',()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); saveDraft();});
+})();
+
+// ---------- Progress ----------
+function updateProgress(){
+  const checks = document.querySelectorAll('input[type="checkbox"]');
+  const total = checks.length;
+  const checked = [...checks].filter(c=>c.checked).length;
+  // include resolved status weight
+  const statusFields = document.querySelectorAll('.def-status');
+  let resolved = 0, statuses = 0;
+  statusFields.forEach(s=>{statuses++; if(s.value==='Resolved') resolved++;});
+  const base = total ? (checked/total) : 0;
+  const statusPart = statuses ? (resolved/statuses) : 0;
+  const pct = Math.round((base*0.6 + statusPart*0.4) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% complete';
+}
+
+// ---------- Save/Load (Local Storage) ----------
+const KEY='deficiency_walkthrough_v1';
+function collect(){
+  // minimal snapshot; we store HTML for dynamic sections for simplicity
+  return {
+    project_name: val('project_name'), project_address: val('project_address'),
+    walk_date: val('walk_date'), walk_time: val('walk_time'), build_type: val('build_type'), phase: val('phase'),
+    client_name: val('client_name'), client_email: val('client_email'), site_contact: val('site_contact'), site_phone: val('site_phone'),
+    pm_name: val('pm_name'), sup_name: val('sup_name'),
+    sig: document.getElementById('sig').toDataURL(),
+    areas_html: document.getElementById('areas').innerHTML,
+    base_site: document.getElementById('site-checklist').innerHTML,
+    base_clean: document.getElementById('clean-checklist').innerHTML
+  };
+}
+function populate(data){
+  for(const k in data){ if(['areas_html','sig','base_site','base_clean'].includes(k)) continue; const el=document.getElementById(k); if(el) el.value=data[k]||''; }
+  document.getElementById('areas').innerHTML = data.areas_html || '';
+  document.getElementById('site-checklist').innerHTML = data.base_site || '';
+  document.getElementById('clean-checklist').innerHTML = data.base_clean || '';
+  rebindDynamic();
+}
+function saveDraft(){ localStorage.setItem(KEY, JSON.stringify(collect())); }
+function loadDraft(){ const raw = localStorage.getItem(KEY); if(!raw) return null; try{ const data=JSON.parse(raw); populate(data); updateProgress(); return data; }catch(e){ console.warn(e); return null; } }
+function clearDraft(){ localStorage.removeItem(KEY); location.reload(); }
+function val(id){ const el=document.getElementById(id); return el?el.value:''; }
+
+function rebindDynamic(){
+  // rebind checkboxes, remove buttons, add-def, file inputs, status changes after HTML restore
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',updateProgress));
+  document.querySelectorAll('.def-item .btn-remove').forEach(b=>b.addEventListener('click',e=>{e.currentTarget.closest('.def-item').remove(); updateProgress(); saveDraft();}));
+  document.querySelectorAll('.btn-add-def').forEach(b=>b.addEventListener('click',e=> addDeficiency(e.currentTarget.closest('.def-item'))));
+  document.querySelectorAll('.btn-photo').forEach(b=>b.addEventListener('click',e=> quickPhoto(e.currentTarget.closest('.def-item').querySelector('.thumbs'))));
+  document.querySelectorAll('.def .def-remove').forEach(b=>b.addEventListener('click',e=>{const d=e.currentTarget.closest('.def'); d.remove(); updateCounts(); updateProgress(); saveDraft();}));
+  document.querySelectorAll('.def .def-status').forEach(s=>s.addEventListener('change',updateProgress));
+}
+
+// ---------- Events ----------
+renderBaseChecklists();
+
+document.getElementById('add_room').addEventListener('click',()=>{ addArea(); });
+
+document.getElementById('btn-save').addEventListener('click',()=>{ saveDraft(); alert('Saved on this device.'); });
+
+document.getElementById('btn-load').addEventListener('click',()=>{ const ok = loadDraft(); if(!ok) alert('No saved draft found.'); });
+
+document.getElementById('btn-clear').addEventListener('click',()=>{ if(confirm('Clear all data?')) clearDraft(); });
+
+document.getElementById('btn-print').addEventListener('click',()=>{ window.print(); });
+
+document.getElementById('quick-add').addEventListener('click',()=>{
+  // ensure at least one area exists
+  if(!areasEl.querySelector('.def-item')) addArea();
+  addDeficiency(areasEl.querySelector('.def-item'));
+});
+
+document.getElementById('quick-photo').addEventListener('click',()=> quickPhoto());
+
+// auto-save periodically
+setInterval(()=>{ try{ saveDraft(); }catch(e){} }, 5000);
+
+// Load previous if present
+loadDraft();
+
+</script>
+</body>
+</html>
